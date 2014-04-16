@@ -142,8 +142,6 @@ def pullSequences(dictionary):
             f.close()
 
 
-#if __name__ == '__main__':
-
 def main():
     print 'It seems to be working'
     filename=sys.argv[1]
