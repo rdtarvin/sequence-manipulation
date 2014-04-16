@@ -1,0 +1,21 @@
+#!/bin/bash
+#$ -A <project>                # Charge project against directive
+#$ -V                                   # Inherit submission environment
+#$ -cwd                                # Use current working directory
+#$ -N makeDB_<database>                  # Job name
+#$ -j y                                  # Combine STDOUT and STDERR
+#$ -o $JOB_NAME.o$JOB_ID           # Name of the output file (eg. myMPI.oJobID)
+#$ -pe 1way 12                     # Request 24 processors, at a rate of 24 proc/node (so 1 node)
+#$ -q normal                        # Use 'normal' queue ('development' for testing, 'largemem' for lots-o-memory)
+#$ -l h_rt=02:00:00                 # Run time (hh:mm:ss)
+#$ -M <email>                           # Email
+#$ -m baes                            # Notifications at beginning and end of job
+
+module load pylauncher
+python makemasterDB.py '<directory>' '<ending>'     
+
+# makes a list of all files in a given directory with a given ending
+
+
+# example:
+# python makemasterDB.py './' '_database_blastx.outfmt6'
