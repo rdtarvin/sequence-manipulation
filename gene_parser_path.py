@@ -140,8 +140,8 @@ def pullSequences(dictionary, directory):
             gene1=gene[:loc]
             gene2=gene[(loc+1):]
             gene=gene1+'--'+gene2
-            if len(gene) > 220:
-                gene=gene[:220]
+        if len(gene) > 220:
+            gene=gene[:220]
         output_file=gene+'.fasta'
         fullpath=os.path.join(directory,output_file)
         with open(fullpath, 'w') as f:
