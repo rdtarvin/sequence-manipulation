@@ -7,7 +7,7 @@ import sys
 import re
 import os
 
-def read_file(csv_input):
+def read_well-names(csv_input):
 	with open(csv_input,'rU') as f:
 		reader = csv.reader(f)
 		d = list(reader)
@@ -37,7 +37,7 @@ def move_files(dictionary, directory):
 		
 def main():
 	assert len(sys.argv) == 3, "\n correct input is: python rename_macrogen.py <csv_file> <directory> \n where <csv_file> is a csv file with two columns, well number then sample name \n and <directory> is the location of the .ab1 files from macrogen"
-	dictionary = read_file(sys.argv[1])
+	dictionary = read_well-names(sys.argv[1])
 	move_files(dictionary,sys.argv[2])
 
 main()
