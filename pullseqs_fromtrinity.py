@@ -14,13 +14,17 @@ def get_seqs(seqfile, matches, outfile):
     records = SeqIO.parse(seqfile, 'fasta')
     seqlist=[]
     matchlist=[]
-    with open(matches,'r') as f:
-        for row in f:
-            matchlist.append(row.strip())
+    with open(matches,'rU') as f:
+    	reader = csv.reader(f,delimiter='\t')
+        for row in reader:
+        	print row
+	        matchlist.append([row[0],row[-2]])
         print matchlist
     for rec in records:
         for item in matchlist:
-            if item in rec.id:
+            if item[0] == rec.id:
+            	rec.description+=' '
+            	rec.description+=item[1]
                 seqlist.append(rec)
             else:
                 continue
@@ -30,10 +34,14 @@ def get_seqs(seqfile, matches, outfile):
 
 
 def main():
-	assert len(sys.argv) == 3, "usage: python pullseqs_fromtrinity.py <Sequences.fasta> <blast_hits.txt>"
+	assert len(sys.argv) == 3, "usage: python pullseqs_fromtrinity.py <sequences.fasta> <blast_hits.txt>"
 	infile = sys.argv[1]
+	print "infile is", infile
 	blast_hits = sys.argv[2]
-	outfile = infile[:infile.index('.')]+blast_hits[:blast_hits.index('.')]+'.fasta'
+	print "blast file is", blast_hits
+	outfile = blast_hits[:blast_hits.index('.')]+'.fasta'
 	get_seqs(infile,blast_hits,outfile)
+	print "outfile is", outfile
 	
 main()
+

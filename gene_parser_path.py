@@ -3,16 +3,15 @@
 '''These functions can be used together to make lists of sequences for all genes
 in a master file of blast outputs. The master file should be created using the
 script makemasterDB.py, which concatenates a bunch of blast datasets into one
-csv file. The file must be csv. The gene_parser_path.py script
+csv file. The file MUST be csv. The gene_parser_csv2.py script
 must be executed from within a folder that contains the blastDatabase.txt file 
 and all trinity files that correspond to that master blast file. As is, this 
 program has to be executed from the python interpreter. If you rerun this file
-it will replace any fasta files with the same output names. The file job submission
-script takes a database filename, a column number with the gene name, and a path 
-to where the gene fasta files should be written.'''
+it will replace any fasta files with the same output names.'''
 
-import pylauncher
+#import pylauncher
 import sys
+import re
 import os
 import csv
 import time
@@ -77,7 +76,7 @@ def rowfinder(genelist,database,column):
 #rowfinder(genelist,filelist,12)
 
 
-def makedict(allDB):
+def makedict(allDB,assemtype):
     '''This function takes a dictionary of genes (keys) and subsetted databases
     corresponding to each gene (values). It returns a dictionary that pairs 
     each gene with a list of sequences that need to be pulled from trinity files.'''
@@ -85,11 +84,17 @@ def makedict(allDB):
     for gene in allDB: #for each gene in the file
         filePairs=[]
         for line in allDB[gene]: #for line in each subsetted database, find query and filename
-            filename='Trinity_'+line[13].strip('"')+'.fasta' #writes filename of trinity file
+            if assemtype == "SOAP":
+		try:
+                    assembly=line[13].strip('"')+'_'+line[14][line[14].index('P')+1:line[14].index('_')].strip("'")+'_out.contig'
+                except:
+		    print "unable to pull from %s, %s" %(line[13],line[14])
+            elif assemtype == 'Trinity':
+                assembly='Trinity_'+line[13].strip('"')+'.fasta' #writes filename of trinity file
             sequence=line[0].strip('"')
-            #print filename
+            print assembly
             #print sequence,gene
-            filePairs.append((filename,sequence)) #make list of trinity and sequence pairs for each gene
+            filePairs.append((assembly,sequence)) #make list of trinity and sequence pairs for each gene
         #print 'The sequences found for the gene %s are %s' %(gene,filePairs)
         #print
         trinities[gene]=filePairs #add list of pairs to dictionary, with gene name as key
@@ -110,7 +115,7 @@ def makedict(allDB):
 #newDict=makedict(allDB)
 
 from Bio import SeqIO
-def pullSequences(dictionary, directory):
+def pullSequences(dictionary, directory,assemtype):
     '''This function takes the dictionary which lists the filename and sequences
     to be pulled for each gene. It creates a new fasta file for each gene with 
     lists of sequences pulled from all blast files that aligned to that gene.'''
@@ -122,15 +127,19 @@ def pullSequences(dictionary, directory):
         for item in dictionary[gene]: #for each sequence listed for a gene
             filename=item[0]
             sequence=item[1]
-            tplace=filename.index('_') #finds location of _ in file name
-            eplace=filename.index('.') #finds location of . in file name
-            tissue=filename[tplace:eplace] #finds tissue name in file name
+            if assemtype == "Trinity":
+            	tplace=filename.index('_') #finds location of _ in file name
+            	eplace=filename.index('.') #finds location of . in file name
+            	tissue=filename[(tplace+1):eplace] #finds tissue name in file name
+            elif assemtype == "SOAP":
+		tissue=filename.split('_')[0]
             #print '    Pulling %s from %s' %(sequence,filename)
             #print
             for record in SeqIO.parse(open(filename, 'rU'),'fasta'): #all files must be in folder
                 if record.id == sequence: #find the sequence in the right file
                     record.description = tissue+'_'+record.description
                     fastaList.append(record) #copy to a list
+		    break
         print 'The %d sequences pulled for the gene %s are:\n' %(len(fastaList),gene)
         for item in fastaList:
             print item
@@ -142,6 +151,7 @@ def pullSequences(dictionary, directory):
             gene=gene1+'--'+gene2
         if len(gene) > 220:
             gene=gene[:220]
+	gene=re.sub(' ', '_', gene)
         output_file=gene+'.fasta'
         fullpath=os.path.join(directory,output_file)
         with open(fullpath, 'w') as f:
@@ -155,11 +165,12 @@ def main():
     print 'It seems to be working'
     filename=sys.argv[1]
     column=int(sys.argv[2])
+    assemtype=sys.argv[4]
     filelist=parsefile(filename)
     (genelist,length)=makelist(filelist,column)
     allDB=rowfinder(genelist,filelist,column)
-    newDict=makedict(allDB)
-    pullSequences(newDict,sys.argv[3])
+    newDict=makedict(allDB,assemtype)
+    pullSequences(newDict,sys.argv[3],assemtype)
     print (time.strftime("%d/%m/%Y"))
     print (time.strftime("%H:%M:%S"))
 

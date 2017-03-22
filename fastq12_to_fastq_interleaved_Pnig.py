@@ -16,10 +16,10 @@ def interleave(prefix):
 	f_iter = FastqGeneralIterator(open(file_f,"rU"))
 	r_iter = FastqGeneralIterator(open(file_r,"rU"))
 	for (f_id, f_seq, f_q), (r_id, r_seq, r_q) in itertools.izip(f_iter,r_iter):
-		assert f_id.split(' ')[1] == r_id.split(' ')[1]
+		assert f_id.split(' ')[0] == r_id.split(' ')[0]
 		count += 2
 		#Write out both reads with "/1" and "/2" suffix on ID
-		handle.write("@%s/1\n%s\n+\n%s\n@%s/2\n%s\n+\n%s\n" % (f_id.split(' ')[1], f_seq, f_q, r_id.split(' ')[1], r_seq, r_q))
+		handle.write("@%s/1\n%s\n+\n%s\n@%s/2\n%s\n+\n%s\n" % (f_id.split(' ')[0], f_seq, f_q, r_id.split(' ')[0], r_seq, r_q))
 	handle.close()
 	print "%i records written to %s" % (count, file_out)
 
