@@ -25,7 +25,7 @@ def get_seqs(seqfile, seq_to_pull, outfile, minlength):
 
 
 def main():
-	assert len(sys.argv) == 4, "usage: python pullseqs_fromtrinity.py <sequences.fasta> <sequence name> <min sequence length>"
+	assert len(sys.argv) == 4, "usage: python pullseqs_generic.py <sequences.fasta> <sequence name> <min sequence length>"
 	infile = sys.argv[1]
 	print "infile is", infile
 	seq_to_pull = sys.argv[2]
